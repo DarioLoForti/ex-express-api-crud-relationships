@@ -143,7 +143,7 @@ const update = async (req, res) => {
 const destroy = async (req, res) => {
   try {
     const { slug } = req.params;
-    const post = await prisma.post.delete({
+    await prisma.post.delete({
       where: {
         slug,
       },
