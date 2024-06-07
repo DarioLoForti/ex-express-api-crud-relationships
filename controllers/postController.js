@@ -1,20 +1,28 @@
+const { tr, th } = require("@faker-js/faker");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const store = async (req, res) => {
-  const { title, content } = req.body;
+  const { title, content, categoryId, tags } = req.body;
 
   const slug = title.toLowerCase().split(" ").join("-");
 
+  const data = {
+    title,
+    content,
+    slug,
+    tags: {
+      connect: tags.map((id) => ({ id })),
+    },
+  };
+
+  if (categoryId) {
+    data.categoryId = categoryId;
+  }
   try {
     const post = await prisma.post.create({
-      data: {
-        title,
-        slug,
-        content,
-      },
+      data,
     });
-
     res.json(post);
   } catch (error) {
     res.json({ error: "An error occurred" });
@@ -57,6 +65,13 @@ const index = async (req, res) => {
       where,
       take: parseInt(limit),
       skip: offset,
+      include: {
+        tags: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
     res.json({ posts, totalPages, currentPage: parseInt(page), totalPosts });
@@ -66,53 +81,75 @@ const index = async (req, res) => {
 };
 
 const show = async (req, res) => {
-  const { slug } = req.params;
-
   try {
+    const slug = req.params.slug;
     const post = await prisma.post.findUnique({
-      where: {
-        slug,
+      where: { slug },
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        tags: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
-
-    res.json(post);
+    if (post) {
+      res.json(post);
+    } else {
+      throw new Error(`Post with slug ${slug} not found.`);
+    }
   } catch (error) {
     res.json({ error: "An error occurred" });
   }
 };
 
 const update = async (req, res) => {
-  const { slug } = req.params;
-  const { title, content, published } = req.body;
-
   try {
+    const slug = req.params.slug;
+    const { title, content, published, categoryId, tags } = req.body;
+    const newSlug = title.toLowerCase().split(" ").join("-");
+
+    const data = {
+      title,
+      slug: newSlug,
+      content,
+      published,
+      tags: {
+        set: tags.map((id) => ({ id: id })),
+      },
+    };
+    if (categoryId) {
+      data.categoryId = categoryId;
+    }
+
     const post = await prisma.post.update({
       where: {
         slug,
       },
-      data: {
-        title,
-        content,
-        published,
-      },
+      data,
     });
-
     res.json(post);
   } catch (error) {
+    console.log(error);
     res.json({ error: "An error occurred" });
   }
 };
 
 const destroy = async (req, res) => {
-  const { slug } = req.params;
   try {
+    const { slug } = req.params;
     const post = await prisma.post.delete({
       where: {
         slug,
       },
     });
 
-    res.json(post);
+    res.json(`Post with slug ${slug} has been deleted`);
   } catch (error) {
     res.json({ error: "An error occurred" });
   }

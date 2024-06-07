@@ -1,4 +1,4 @@
-const { check, validationResult, checkSchema } = require("express-validator");
+const { checkSchema, validationResult } = require("express-validator");
 
 module.exports = (schema) => {
   return [

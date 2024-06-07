@@ -18,16 +18,34 @@ const bodyData = {
       options: { min: 3 },
     },
   },
-  image: {
-    in: ["body"],
-    isString: {
-      errorMessage: "Image must be a string.",
-      bail: true,
-    },
-    isURL: {
-      errorMessage: "Image must be a valid URL.",
-    },
-  },
+  //   slug: {
+  //     in: ["body"],
+  //     notEmpty: {
+  //       errorMessage: "Slug is required.",
+  //       bail: true,
+  //     },
+  //     isString: {
+  //       errorMessage: "Slug must be a string.",
+  //       bail: true,
+  //     },
+  //     isLength: {
+  //       errorMessage: "Slug should be at least 3 characters.",
+  //       options: { min: 3 },
+  //     },
+  //     custom: {
+  //       options: async (value) => {
+  //         const post = await prisma.post.findUnique({
+  //           where: {
+  //             slug: value,
+  //           },
+  //         });
+
+  //         if (post) {
+  //           throw new Error(`Slug ${value} already exists.`);
+  //         }
+  //       },
+  //     },
+  //   },
   content: {
     in: ["body"],
     notEmpty: {
@@ -41,6 +59,13 @@ const bodyData = {
     isLength: {
       errorMessage: "Content should be at least 10 characters.",
       options: { min: 10 },
+    },
+  },
+  published: {
+    in: ["body"],
+    isBoolean: {
+      errorMessage: "Published must be a boolean.",
+      bail: true,
     },
   },
   categoryId: {
@@ -59,8 +84,9 @@ const bodyData = {
         });
 
         if (!category) {
-          return Promise.reject(`Category with ID ${categoryId} not found.`);
+          throw new Error(`Category with ID ${categoryId} not found.`);
         }
+        return true;
       },
     },
   },
