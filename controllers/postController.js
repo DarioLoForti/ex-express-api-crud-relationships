@@ -66,6 +66,11 @@ const index = async (req, res) => {
       take: parseInt(limit),
       skip: offset,
       include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
         tags: {
           select: {
             name: true,
