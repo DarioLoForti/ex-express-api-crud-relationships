@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const postsRouter = require("./routers/postsRouter");
 const categoriesRouter = require("./routers/categoriesRouter");
+const tagsRouter = require("./routers/tagsRouter");
 const errorHandler = require("./middleware/errorHandler");
 const notFoundHandler = require("./middleware/notFoundHandler");
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/posts", postsRouter);
 app.use("/categories", categoriesRouter);
+app.use("/tags", tagsRouter);
 
 app.use(errorHandler);
 
